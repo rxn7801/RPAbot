@@ -209,10 +209,8 @@ public class RobotBrowserTemplate implements IRobot {
 
         server.info(" Is Match found :: " + isMatchFound);
 
-        if (isMatchFound)
-            browser.textFieldSet(searchText, "Match Found!", true);
-        else
-            browser.textFieldSet(searchText, "Match Not Found!", true);
+        if (isMatchFound) browser.textFieldSet(searchText, "Match Found!", true);
+        else browser.textFieldSet(searchText, "Match Not Found!", true);
 
 
         //This command is uses to make visible in the desktop the page (IExplore issue)

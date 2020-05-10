@@ -194,6 +194,7 @@ public class RobotBrowserTemplate implements IRobot {
 
         WebDriver webDriver = browser.getDriver();
         List<String> handles = new ArrayList<>(webDriver.getWindowHandles());
+        server.info("Window Handles : " + handles);
 
         for (String handle : handles) {
             webDriver.switchTo().window(handle);

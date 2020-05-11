@@ -1,23 +1,37 @@
 package com.novayre.jidoka.robot.test;
 
-import com.novayre.jidoka.client.api.exceptions.JidokaItemException;
-import com.novayre.jidoka.data.provider.api.IJidokaDataProvider;
-import com.novayre.jidoka.data.provider.api.IJidokaExcelDataProvider;
-import org.apache.commons.lang.StringUtils;
-
 import com.novayre.jidoka.browser.api.EBrowsers;
 import com.novayre.jidoka.browser.api.IWebBrowserSupport;
 import com.novayre.jidoka.client.api.IJidokaServer;
 import com.novayre.jidoka.client.api.IRobot;
 import com.novayre.jidoka.client.api.JidokaFactory;
 import com.novayre.jidoka.client.api.annotations.Robot;
+import com.novayre.jidoka.client.api.exceptions.JidokaItemException;
 import com.novayre.jidoka.client.api.multios.IClient;
+import com.novayre.jidoka.data.provider.api.IJidokaDataProvider;
+import com.novayre.jidoka.data.provider.api.IJidokaExcelDataProvider;
+import com.novayre.jidoka.windows.api.IField;
+import com.novayre.jidoka.windows.api.IWindows;
+import com.novayre.jidoka.windows.api.WindowInfo;
+import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.WinUser;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebElement;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.novayre.jidoka.client.api.multios.IClient.getInstance;
 
 /**
  * Browser robot template.
@@ -70,6 +84,8 @@ public class RobotBrowserTemplate implements IRobot {
      */
     private String excelFile;
 
+    private IWindows windows;
+
 
     /**
      * Action "start"
@@ -78,11 +94,13 @@ public class RobotBrowserTemplate implements IRobot {
      */
     public void start() throws Exception {
 
-        server = (IJidokaServer<?>) JidokaFactory.getServer();
+        server = JidokaFactory.getServer();
 
         dataProvider = IJidokaDataProvider.getInstance(this, IJidokaDataProvider.Provider.EXCEL);
 
-        client = IClient.getInstance(this);
+        client = getInstance(this);
+
+        windows = IWindows.getInstance(this);
 
         initDataProvider();
     }
@@ -94,7 +112,7 @@ public class RobotBrowserTemplate implements IRobot {
      *
      * @throws Exception in case any exception is thrown during the initialization
      */
-    public void initDataProvider() throws Exception {
+    private void initDataProvider() throws Exception {
 
         server.info("Initializing Data Provider with file: " + EXCEL_FILENAME);
 
@@ -116,7 +134,7 @@ public class RobotBrowserTemplate implements IRobot {
      * In this template example, the processing consists of concatenating the first
      * 3 columns to get the string result and update the last column.
      */
-    public boolean processItem(String input) {
+    private boolean processItem(String input) {
 
         boolean isMatchFound = false;
 
@@ -153,7 +171,7 @@ public class RobotBrowserTemplate implements IRobot {
      */
     public void openBrowser() throws Exception {
 
-        browser = IWebBrowserSupport.getInstance(this, client);
+        browser = IWebBrowserSupport.getInstance(this, windows, client);
 
         browserType = server.getParameters().get("Browser");
 
@@ -171,6 +189,11 @@ public class RobotBrowserTemplate implements IRobot {
         // Set timeout to 60 seconds
         browser.setTimeoutSeconds(60);
 
+        // Set remote debugger port before initializing browser
+        ChromeOptions options = new ChromeOptions();
+        options.setExperimentalOption("debuggerAddress","localhost:5383");
+        browser.setCapabilities(options);
+
         // Init the browser module
         browser.initBrowser();
 
@@ -186,9 +209,6 @@ public class RobotBrowserTemplate implements IRobot {
     public void navigateToWeb() throws Exception {
 
         server.setCurrentItem(1, HOME_URL);
-
-        // Navigate to HOME_URL address
-        browser.navigate(HOME_URL);
 
         By searchBar = By.xpath("/html/body/div/div[4]/form/div[2]/div[1]/div[1]/div/div[2]/input");
 
@@ -237,7 +257,7 @@ public class RobotBrowserTemplate implements IRobot {
      * @throws Exception
      */
     public void closeBrowser() throws Exception {
-       // close();
+        // close();
         closeDataProvider();
         server.setCurrentItemResultToOK("Success");
     }

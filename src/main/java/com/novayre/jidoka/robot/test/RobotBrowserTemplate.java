@@ -10,26 +10,14 @@ import com.novayre.jidoka.client.api.exceptions.JidokaItemException;
 import com.novayre.jidoka.client.api.multios.IClient;
 import com.novayre.jidoka.data.provider.api.IJidokaDataProvider;
 import com.novayre.jidoka.data.provider.api.IJidokaExcelDataProvider;
-import com.novayre.jidoka.windows.api.IField;
-import com.novayre.jidoka.windows.api.IWindows;
-import com.novayre.jidoka.windows.api.WindowInfo;
-import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.WinDef;
-import com.sun.jna.platform.win32.WinUser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.RemoteWebElement;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.novayre.jidoka.client.api.multios.IClient.getInstance;
 
@@ -84,9 +72,6 @@ public class RobotBrowserTemplate implements IRobot {
      */
     private String excelFile;
 
-    private IWindows windows;
-
-
     /**
      * Action "start"
      *
@@ -99,8 +84,6 @@ public class RobotBrowserTemplate implements IRobot {
         dataProvider = IJidokaDataProvider.getInstance(this, IJidokaDataProvider.Provider.EXCEL);
 
         client = getInstance(this);
-
-        windows = IWindows.getInstance(this);
 
         initDataProvider();
     }
@@ -171,7 +154,7 @@ public class RobotBrowserTemplate implements IRobot {
      */
     public void openBrowser() throws Exception {
 
-        browser = IWebBrowserSupport.getInstance(this, windows, client);
+        browser = IWebBrowserSupport.getInstance(this, client);
 
         browserType = server.getParameters().get("Browser");
 
